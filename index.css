@@ -1,0 +1,14 @@
+body {
+  background-color: black;
+  display: flex;
+}
+.myCanvas {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  position: absolute;
+  margin: auto;
+  border: 1px solid;
+  border-color: wheat;
+}
