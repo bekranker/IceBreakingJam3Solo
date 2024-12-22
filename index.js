@@ -1,5 +1,8 @@
 const blocks = [];
 let SpawnedPlayer = null;
+let SpawnedBall = null;
+let jump = false;
+
 class block {
   constructor(x, y, name) {
     this.name = name;
@@ -8,6 +11,7 @@ class block {
   }
   drawMe = () => {
     const ctx = GetContext();
+    ctx.beginPath();
     ctx.strokeStyle = "red";
     ctx.rect(this.x + 15, this.y - 30, 60, 20);
     ctx.stroke();
@@ -21,23 +25,62 @@ class Player {
     this.y = y;
     this.xSpeed = xSpeed;
     this.ySpeed = ySpeed;
+    setInterval(this.changePos, 20);
   }
 
   drawMe = () => {
     const ctx = GetContext();
+    ctx.beginPath();
+    ctx.rect(this.x, this.y, 100, 20);
     ctx.strokeStyle = "white";
-    ctx.rect(this.x, this.y, 120, 20);
     ctx.stroke();
   };
   clearMe = () => {
     const ctx = GetContext();
-    ctx.clearRect(this.x, this.y, 120, 20);
+    ctx.clearRect(this.x - 1, this.y - 1, 102, 22); // Önce eski pozisyonu temizle
   };
   changePos = () => {
     this.clearMe();
     this.x += this.xSpeed;
     this.y += this.ySpeed;
     this.drawMe();
+  };
+}
+class Ball {
+  constructor(x, y, xSpeed, ySpeed) {
+    this.xSpeed = xSpeed;
+    this.ySpeed = ySpeed;
+    this.x = x;
+    this.y = y;
+    this.startPosY = 650;
+    setInterval(this.changePos, 20);
+  }
+  drawMe = () => {
+    const ctx = GetContext();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI);
+    ctx.strokeStyle = "white";
+    ctx.stroke();
+  };
+  clearMe = () => {
+    const ctx = GetContext();
+    ctx.clearRect(this.x - 20, this.y - 20, 40, 40);
+  };
+  changePos = () => {
+    if (!jump) {
+      this.clearMe();
+      this.changeStartPos();
+      this.drawMe();
+    } else {
+      this.clearMe();
+      this.x += this.xSpeed;
+      this.y += this.ySpeed;
+      this.drawMe();
+    }
+  };
+  changeStartPos = () => {
+    this.x = SpawnedPlayer.x + 50;
+    this.y = 650;
   };
 }
 function createBlocks() {
@@ -50,11 +93,10 @@ function createBlocks() {
 }
 function spawnPlayer() {
   createBlocks();
-  SpawnedPlayer = new Player(250, 700, 100, 100);
-  console.log(SpawnedPlayer);
-  SpawnedPlayer.drawMe();
+  SpawnedPlayer = new Player(250, 700, 0, 0);
+  SpawnedBall = new Ball(300, 650, 0, 0);
 }
-window.onload += spawnPlayer();
+window.onload = spawnPlayer;
 window.addEventListener("keydown", (e) => {
   if (e.key === "ArrowRight") {
     SpawnedPlayer.xSpeed = 10;
@@ -62,6 +104,7 @@ window.addEventListener("keydown", (e) => {
     SpawnedPlayer.xSpeed = -10;
   }
 });
+
 window.addEventListener("keyup", (e) => {
   if (e.key === "ArrowRight") {
     SpawnedPlayer.xSpeed = 0;
@@ -69,7 +112,8 @@ window.addEventListener("keyup", (e) => {
     SpawnedPlayer.xSpeed = 0;
   }
 });
-
-window.onkeyup += () => {
-  SpawnedPlayer.xSpeed = 0;
-};
+window.addEventListener("keypress", (e) => {
+  if (e.keyCode === 0 || e.keyCode === 32) {
+    jump = true;
+  }
+});
